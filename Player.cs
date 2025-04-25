@@ -6,6 +6,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 
 namespace DungeonExplorer
 {
@@ -65,7 +66,7 @@ namespace DungeonExplorer
     public class Player : Creature
     {
         public Inventory PlayerInventory = new Inventory();
-        public int EquipedItem;
+        public int[] EquipedItem = new int[2];
         public Player(string name, int health, int damage) : base(name, health, damage){}
         public void Travel(int direction, Room location)
         {
@@ -92,18 +93,17 @@ namespace DungeonExplorer
                 Console.Write("\nThere is no door there\n");
             }
         }
-        public void EquipItem()
+        public void EquipItem(string playerInput)
         {
-
+            int[] chosenItem = PlayerInventory.search(playerInput);
+            EquipedItem[0] = chosenItem[0];
+            EquipedItem[1] = chosenItem[1];
         }
         public new int Strike()
         {
-            if (EquipedItem != -1)
+            if (EquipedItem[0] == 0)
             {
-                if (PlayerInventory.GetInventoryContents()[EquipedItem].GetItemType() == "Weapon")
-                {
-                    return Damage + PlayerInventory.GetInventoryContents()[EquipedItem].getDamage();
-                }
+                return Damage + PlayerInventory.getWeapon(EquipedItem[1]).getDamage();
             }
             return Damage;
         }
@@ -119,25 +119,50 @@ namespace DungeonExplorer
     public class Inventory
     {
         public Weapon[] WeaponsArray = new Weapon[3];
+        public int WeaponArrayEmptySpacePointer = 0;
         public Potion[] PotionsArray = new Potion[3];
+        public int PotionArrayEmptySpacePointer = 0;
         public LightSource[] LightsourceArray = new LightSource[2];
+        public int LightSourceArrayEmptySpacePointer = 0;
         public Items[] InventoryContents = new Items[3];
-        public int[] IndexArray = new int[8];
+        public int[,] ItemIndexArray = new int[8,2];
         public int[] ItemIDArray = new int[8];
-        public int EmptySpacePointer = 0;
+        public int ItemIDIndexArrayEmptySpacePointer = 0;
         public Inventory()
         {
 
         }
-        public void AddItem(Items artefact)
+        public void AddWeapon(Weapon artefact)
         {
-            if (artefact.GetItemType() == "Weapon")
-            {
-            InventoryContents[EmptySpacePointer] = artefact;
-            ItemIDArray[EmptySpacePointer] = artefact.getIndexID();
-            }
-            EmptySpacePointer++;
+            WeaponsArray[WeaponArrayEmptySpacePointer] = artefact;
+            artefact.SetIndexID(WeaponArrayEmptySpacePointer);
+            WeaponArrayEmptySpacePointer++;
+            ItemIDArray[ItemIDIndexArrayEmptySpacePointer] = artefact.GetItemID();
+            ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,0] = artefact.getTypeID();
+            ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,1] = artefact.getIndexID();
+            ItemIDIndexArrayEmptySpacePointer++;
         }
+        public void AddPotion(Potion artefact)
+        {
+            PotionsArray[PotionArrayEmptySpacePointer] = artefact;
+            artefact.SetIndexID(PotionArrayEmptySpacePointer);
+            PotionArrayEmptySpacePointer++;
+            ItemIDArray[ItemIDIndexArrayEmptySpacePointer] = artefact.GetItemID();
+            ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,0] = artefact.getTypeID();
+            ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,1] = artefact.getIndexID();
+            ItemIDIndexArrayEmptySpacePointer++;
+        }
+        public void AddLightSource(LightSource artefact)
+        {
+            LightsourceArray[LightSourceArrayEmptySpacePointer] = artefact;
+            artefact.SetIndexID(LightSourceArrayEmptySpacePointer);
+            LightSourceArrayEmptySpacePointer++;
+            ItemIDArray[ItemIDIndexArrayEmptySpacePointer] = artefact.GetItemID();
+            ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,0] = artefact.getTypeID();
+            ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,1] = artefact.getIndexID();
+            ItemIDIndexArrayEmptySpacePointer++;
+        }
+        public Weapon getWeapon(int indexID){return WeaponsArray[indexID];}
         public void SortByItemID()
         {
             int currentPointer = 0;
@@ -165,6 +190,76 @@ namespace DungeonExplorer
             }
         }
         public Items[] GetInventoryContents(){return InventoryContents;}
+        public void DisplayInventoryContents()
+        {
+            int displayCounter = 0;
+            while (displayCounter <= 7)
+            {
+                if (ItemIndexArray[displayCounter, 0] == 0)
+                {
+                    Console.Write($@"{WeaponsArray[ItemIndexArray[displayCounter, 1]].getItemName()}
+                    Item Type: Weapon
+                    Description: {WeaponsArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}");
+                } else if (ItemIndexArray[displayCounter, 0] == 1){
+                    Console.Write($@"{PotionsArray[ItemIndexArray[displayCounter, 1]].getItemName()}
+                    Item Type: Potion
+                    Description: {PotionsArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}");
+                } else if (ItemIndexArray[displayCounter, 0] == 2){
+                    Console.Write($@"{LightsourceArray[ItemIndexArray[displayCounter, 1]].getItemName()}
+                    Item Type: Light Source
+                    Description: {LightsourceArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}");
+                } else {
+                    Console.Write("Uuuuuhhhhh, How? This message shouldn't appear. How did you do this?");
+                }
+            }
+        }
+        public int[] search(string desiredItem)
+        {
+            int searchIndex = 0;
+            int arrayIndex = 0;
+            int[] outputArray = new int[2];
+            while (true)
+            {
+                while (searchIndex < 3){
+                    if (arrayIndex == 0)
+                    {
+                        if (WeaponsArray[searchIndex].getItemName().ToLower() == desiredItem.ToLower())
+                        {
+                            outputArray[0] = arrayIndex;
+                            outputArray[1] = searchIndex;
+                            return outputArray;
+                        }
+                    } else if (arrayIndex == 1){
+                        if (PotionsArray[searchIndex].getItemName().ToLower() == desiredItem.ToLower())
+                        {
+                            Console.Write("A potion is not an equipable item");
+                            outputArray[0] = -1;
+                            outputArray[1] = -1;
+                        }
+                    } else if (arrayIndex == 2){
+                        if (searchIndex == 2)
+                        {
+                            Console.Write("You do not possess that item.");
+                            outputArray[0] = -1;
+                            outputArray[1] = -1;
+                            return outputArray;
+                        }else if (LightsourceArray[searchIndex].getItemName().ToLower() == desiredItem.ToLower()){
+                            outputArray[0] = arrayIndex;
+                            outputArray[1] = searchIndex;
+                            return outputArray;
+                        }
+                    }
+                    searchIndex++;
+                }
+                searchIndex = 0;
+                arrayIndex++;
+                if (arrayIndex == 4){break;}
+            }
+            outputArray[1] = -1;
+            outputArray[0] = -1;
+            return outputArray;
+        }
+        public int[,] getItemIndexArray(){return ItemIndexArray;}
     }
     public abstract class Items
     {
@@ -174,6 +269,7 @@ namespace DungeonExplorer
         public string ItemDescription;
         public bool Equipable;
         public string ItemType;
+        public bool Collected = false;
         public Items(int itemID, string itemName, string itemDescription, bool equipable, int typeID, string itemType, int indexID)
         {
             ItemIndex[0] = typeID;
@@ -188,11 +284,16 @@ namespace DungeonExplorer
         public int getIndexID(){return ItemIndex[1];}
         public string getItemName(){return ItemName;}
         public string GetItemType(){return ItemType;}
+        public int GetItemID(){return ItemID;}
+        public void SetIndexID(int indexID){ItemIndex[1] = indexID;}
+        public void SetCollected(bool collected){ Collected = collected;}
+        public int[] GetItemIndex(){return ItemIndex;}
+        public string GetItemDescription(){return ItemDescription;}
     }
     public class Weapon : Items
     {
         int Damage;
-        public Weapon(int itemID, string itemName, string itemDescription, int damage, string itemType) : base(itemID, itemName, itemDescription, true, 0, itemType)
+        public Weapon(int itemID, string itemName, string itemDescription, int damage, string itemType, int indexID) : base(itemID, itemName, itemDescription, true, 0, itemType, indexID)
         {
             Damage = damage;
         }
@@ -205,7 +306,7 @@ namespace DungeonExplorer
     {
         public bool Used = false;
         public int Healing;
-        public Potion(int itemID, string itemName, string itemDescription, int healing, string itemType) : base(itemID, itemName, itemDescription, false, 1, itemType)
+        public Potion(int itemID, string itemName, string itemDescription, int healing, string itemType, int indexID) : base(itemID, itemName, itemDescription, false, 1, itemType, indexID)
         {
             Healing = healing;
         }
@@ -216,7 +317,7 @@ namespace DungeonExplorer
     }
     public class LightSource : Items
     {
-        public LightSource(int itemID, string itemName, string itemDescription, string itemType) : base(itemID, itemName, itemDescription, true, 2, itemType)
+        public LightSource(int itemID, string itemName, string itemDescription, string itemType, int indexID) : base(itemID, itemName, itemDescription, true, 2, itemType, indexID)
         {
             
         }
