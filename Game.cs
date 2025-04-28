@@ -83,12 +83,13 @@ namespace DungeonExplorer
             roomEnemy = new Enemy("Skeleton", 20, 2);
             foyer.setHostile(roomEnemy);
             this.allRooms.Add(foyer);
-            design = @"";
+            design = @"You enter a lavish dining room. In the centre,
+                you see a large table surrounded by chairs.";
             design = design.Replace("                ", " ");
             Room diningRoom = new Room(design);
             roomPotion = new Potion(2,"Small Health Potion", "A potion that will provide a small amount of health when drank", 20);
             diningRoom.SetPotion(roomPotion);
-            action = @"";
+            action = @"You lift a potion off of the table gently, careful not to damage it.";
             action = action.Replace("               ", " ");
             diningRoom.SetAction(action);
             diningRoom.SetIndex(2);
@@ -96,7 +97,7 @@ namespace DungeonExplorer
             roomEnemy = new Enemy("Slime", 40, 1);
             diningRoom.setHostile(roomEnemy);
             allRooms.Add(diningRoom);
-            design = @"";
+            design = @"The head of the double bed rests against the south wall. At the foot of it you see a small strongbox.";
             design = design.Replace("                ", " ");
             Room mastersBedroom = new Room(design);
             roomPotion = new Potion (3, "Medium Health Potion", "A potion that will provide a medium amount of health when drank", 35);
@@ -111,12 +112,12 @@ namespace DungeonExplorer
             roomEnemy = new Enemy("Skeleton", 20,2);
             mastersBedroom.setHostile(roomEnemy);
             allRooms.Add(mastersBedroom);
-            design = @"";
+            design = @"You enter the kitchen to see a wood stove against the far wall, work tops on either side.";
             design = design.Replace("                ", " ");
             Room kitchen = new Room(design);
             roomWeapon = new Weapon(4,"Skillet", "A cast Iron Skillet, it could be used as a Weapon should worst come to worst", 5);
             kitchen.SetWeapon(roomWeapon);
-            action = @"";
+            action = @"You reach to the stove and pick up the Cast-Iron skillet.";
             action = action.Replace("               ", " ");
             kitchen.SetAction(action);
             kitchen.SetIndex(4);
@@ -124,12 +125,15 @@ namespace DungeonExplorer
             roomEnemy = new Enemy("Zombie", 20, 4);
             kitchen.setHostile(roomEnemy);
             allRooms.Add(kitchen);
-            design = @"";
+            design = @"You see a chandelier hanging down from above. There are small tables dotted around the edge of the room.";
             design = design.Replace("               ", " ");
             Room ballRoom = new Room(design);
             roomLightSource = new LightSource(5,"Candalabra", "A candalabra containing 3 candles. it should illuminate a dark room");
             ballRoom.setLightSource(roomLightSource);
-            action = @"";
+            action = @"You approach one of the small tables,
+                a candelabra is perched upon it. Lifting
+                it up, you decide it could be usefull down
+                the line and add it to your bag.";
             action = action.Replace("               ", " ");
             ballRoom.SetAction(action);
             ballRoom.SetIndex(5);
@@ -137,12 +141,12 @@ namespace DungeonExplorer
             roomEnemy = new Enemy("Slime", 40, 1);
             ballRoom.setHostile(roomEnemy);
             allRooms.Add(ballRoom);
-            design = @"";
+            design = @"A tub resides near the south wall, a mirror by the north. Nex to the mirror, on a side table, is a shaving set.";
             design = design.Replace("                ", " ");
             Room mastersBathroom = new Room(design);
             roomWeapon = new Weapon(6,"Straight Razor", "A razorblade that can be folded out of it's handel. A quick strike would be effective against any enemy.", 3);
             mastersBathroom.SetWeapon(roomWeapon);
-            action = @"";
+            action = @"In the shaving set, you find a straight razor, deciding it could be useful, you add it to your bag.";
             action = action.Replace("               ", " ");
             mastersBathroom.SetAction(action);
             mastersBathroom.SetIndex(6);
@@ -150,12 +154,12 @@ namespace DungeonExplorer
             roomEnemy = new Enemy("Zombie", 20, 4);
             mastersBathroom.setHostile(roomEnemy);
             allRooms.Add(mastersBathroom);
-            design = @"";
+            design = @"Shelves line the walls, all looking to have contained various foods, all now rotten to the point of being reduced to dust.";
             design = design.Replace("                ", " ");
             Room pantry = new Room(design);
             roomPotion = new Potion(7, "Large Healing Potion", "A potion that heals a large amount of health.", 50);
             pantry.SetPotion(roomPotion);
-            action = @"";
+            action = @"On one of the shelves, you find a large potion, you add it to your bag for safe keeping.";
             action = action.Replace("               ", " ");
             pantry.SetAction(action);
             pantry.SetIndex(7);
@@ -163,19 +167,23 @@ namespace DungeonExplorer
             roomEnemy = new Enemy("Demon Hound", 40, 3);
             pantry.setHostile(roomEnemy);
             allRooms.Add(pantry);
-            design = @"";
+            design = @"There are several bunks around the room,
+                these look to have belonged to the servants of
+                the house. Under the candle light, you can see
+                shadows dancing, almost as if the servants were
+                still here.";
             design = design.Replace("                ", " ");
             Room servantsQuarters = new Room(design);
-            action = "After searching around the room, you find nothing of use";
+            action = "After searching around the room, you find nothing of use.";
             servantsQuarters.SetAction(action);
             servantsQuarters.SetDark(true);
             servantsQuarters.SetIndex(8);
             servantsQuarters.SetAdjacent(9,-1,-1,5);
             allRooms.Add(servantsQuarters);
-            design = @"";
+            design = @"Not needed";
             design = design.Replace("               ", " ");
             Room finalRoom = new Room(design);
-            action = @"";
+            action = @"Not needed";
             finalRoom.SetAction(action);
             finalRoom.SetIndex(9);
             finalRoom.SetAdjacent(8, -1, -1, -1);
