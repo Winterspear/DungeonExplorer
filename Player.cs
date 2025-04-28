@@ -16,6 +16,7 @@ namespace DungeonExplorer
         public int Health { get; private set; }
         public int Damage { get; private set; }
         private int roomIndex = 0;
+        public bool Dead = false;
 
         public Creature(string name, int health, int damage) 
         {
@@ -61,12 +62,19 @@ namespace DungeonExplorer
         {
             return Damage;
         }
+        public void takeDamage(int damage){
+            Health = Health - damage;
+            Console.Write($"\nThe {Name} took {damage} damage\n");
+            if (Health <= 0 ){Dead = true;}
+        }
+        public bool getDead(){return Dead;}
         
     }
     public class Player : Creature
     {
         public Inventory PlayerInventory = new Inventory();
         public int[] EquipedItem = new int[2];
+        public int PreviousRoomIndex;
         public Player(string name, int health, int damage) : base(name, health, damage){}
         public void Travel(int direction, Room location)
         {
@@ -81,6 +89,7 @@ namespace DungeonExplorer
             int[] availableDirections = location.GetDirections();
             if (availableDirections[direction] > -1 & availableDirections[direction] < 2)
             {
+                PreviousRoomIndex = GetRoomIndex();
                 this.SetRoomIndex(availableDirections[direction]);
                 Console.Write("\nYou Enter a new room\n");
             }
@@ -95,7 +104,7 @@ namespace DungeonExplorer
         }
         public void EquipItem(string playerInput)
         {
-            int[] chosenItem = PlayerInventory.search(playerInput);
+            int[] chosenItem = PlayerInventory.searchIndexArray(playerInput);
             EquipedItem[0] = chosenItem[0];
             EquipedItem[1] = chosenItem[1];
         }
@@ -107,13 +116,35 @@ namespace DungeonExplorer
             }
             return Damage;
         }
+        public void GetStatus()
+        {
+            Console.Write($"Health: {Health}\nDamage: {Strike()}\n");
+            PlayerInventory.DisplayInventoryContents();
+            while (true)
+            {
+                Console.Write($"What would you like to do?\n1. Equip an item\n2. Close inventory");
+                string option = Console.ReadLine();
+                if (option == "2"){break;}
+                else if (option == "1")
+                {
+                    Console.Write("Please choose an item (by name)");
+                    string itemToEquip = Console.ReadLine();
+                    EquipItem(itemToEquip);
+                    if (EquipedItem[0] == -1){
+                        Console.WriteLine("Items unequiped)");
+                    } else {Console.Write($"You have Eqiped a {itemToEquip}");}
+                } else {
+                    Console.Write("That is not a valid input. Please try again.");
+                }
+            }
+        }
+        public int getPreviousRoomIndex(){return PreviousRoomIndex;}
     }
     public class Enemy : Creature
     {
         string EnemyType = "";
-        public Enemy(string name, int health, string monsterType, int damage) : base(name, health, damage)
+        public Enemy(string name, int health, int damage) : base(name, health, damage)
         {
-            EnemyType = monsterType;
         }
     }
     public class Inventory
@@ -213,7 +244,7 @@ namespace DungeonExplorer
                 }
             }
         }
-        public int[] search(string desiredItem)
+        public int[] searchIndexArray(string desiredItem)
         {
             int searchIndex = 0;
             int arrayIndex = 0;
@@ -270,10 +301,9 @@ namespace DungeonExplorer
         public bool Equipable;
         public string ItemType;
         public bool Collected = false;
-        public Items(int itemID, string itemName, string itemDescription, bool equipable, int typeID, string itemType, int indexID)
+        public Items(int itemID, string itemName, string itemDescription, bool equipable, int typeID, string itemType)
         {
             ItemIndex[0] = typeID;
-            ItemIndex[1] = indexID;
             ItemName = itemName;
             ItemDescription = itemDescription;
             Equipable = equipable;
@@ -293,7 +323,7 @@ namespace DungeonExplorer
     public class Weapon : Items
     {
         int Damage;
-        public Weapon(int itemID, string itemName, string itemDescription, int damage, string itemType, int indexID) : base(itemID, itemName, itemDescription, true, 0, itemType, indexID)
+        public Weapon(int itemID, string itemName, string itemDescription, int damage) : base(itemID, itemName, itemDescription, true, 0, "Weapon")
         {
             Damage = damage;
         }
@@ -306,7 +336,7 @@ namespace DungeonExplorer
     {
         public bool Used = false;
         public int Healing;
-        public Potion(int itemID, string itemName, string itemDescription, int healing, string itemType, int indexID) : base(itemID, itemName, itemDescription, false, 1, itemType, indexID)
+        public Potion(int itemID, string itemName, string itemDescription, int healing) : base(itemID, itemName, itemDescription, false, 1, "Potion")
         {
             Healing = healing;
         }
@@ -317,14 +347,17 @@ namespace DungeonExplorer
     }
     public class LightSource : Items
     {
-        public LightSource(int itemID, string itemName, string itemDescription, string itemType, int indexID) : base(itemID, itemName, itemDescription, true, 2, itemType, indexID)
-        {
-            
-        }
+        public LightSource(int itemID, string itemName, string itemDescription) : base(itemID, itemName, itemDescription, true, 2, "LightSource"){}
         
+    }
+    public class VoidItem : Items
+    {
+        public VoidItem() : base(-1, "", "", false, -1, "Void"){}
     }
     public class GameMap
     {
-
+        public void OpenMap(){
+            Process.Start(@"map.png");
+        }
     }
 }

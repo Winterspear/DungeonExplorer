@@ -10,9 +10,16 @@ namespace DungeonExplorer
         private string description;
         private int[] directions = {-1, -1, -1, -1};
         private string[] collectable = new string[2];
+        public Weapon RoomWeapon;
+        public Potion RoomPotion;
+        public LightSource RoomLightSource;
+        public string RoomItemType = "Void";
         private string action = "Error";
         private bool itemPickedUp = false;
         private int index;
+        public bool Dark;
+        public bool VictoryRoom = false;
+        public Enemy Hostile;
         public Room(string description){this.description = description;}
         /*
          * Shown above is the constructor for the Room class
@@ -53,17 +60,20 @@ namespace DungeonExplorer
          * Outputs:
          * Int Array: (4 Items)
          */
-        public void SetItem(string itemName, string itemDescription)
+        public void SetWeapon(Weapon roomWeapon)
         {
-            /*
-             * This is the creation of an item
-             * Inputs:
-             * string: itemName, itemDescription
-             * Outputs:
-             * None
-             */
-            this.collectable[0] = itemName;
-            this.collectable[1] = itemDescription;
+            RoomWeapon = roomWeapon;
+            RoomItemType = "Weapon";
+        }
+        public void SetPotion(Potion roomPotion)
+        {
+            RoomPotion = roomPotion;
+            RoomItemType = "Potion";
+        }
+        public void setLightSource(LightSource roomLightSource)
+        {
+            RoomLightSource = roomLightSource;
+            RoomItemType = "LightSource";
         }
         public void SetAction(string itemAction){this.action = itemAction;}
         /*
@@ -73,23 +83,10 @@ namespace DungeonExplorer
          * Outputs:
          * None
          */
-        public string[] GetCollectable()
-        {
-            /*
-             * This allows the Character to pick up an item, and tell if an item has already been collected
-             * Inputs:
-             * None
-             * Outputs:
-             * string: (Either collectable or empty)
-             */
-            string[] empty = new string[1];
-            if (this.itemPickedUp == false)
-            {
-                this.UpdateAction();
-                return this.collectable;
-            }
-            else{return empty;}
-        }
+         public Weapon getRoomWeapon(){return RoomWeapon;}
+         public Potion getRoomPotion(){return RoomPotion;}
+         public LightSource getRoomLightSource(){return RoomLightSource;}
+         public string getRoomItemType(){return RoomItemType;}
         public string GetAction(){return this.action;}
         /*
          * Shown above is the function that returns how the character picks up the item
@@ -134,6 +131,11 @@ namespace DungeonExplorer
          * Outputs:
          * Int: Index
          */
-
+        public void SetDark(bool dark){Dark = dark;}
+        public void SetVicoryRoom(bool win){VictoryRoom = win;}
+        public bool GetVictoryRoom(){return VictoryRoom;}
+        public bool getDark(){return Dark;}
+        public void setHostile(Enemy hostile){Hostile = hostile;}
+        public Enemy getHostile(){return Hostile;}
     }
 }
