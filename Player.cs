@@ -10,6 +10,7 @@ using System.Runtime.ExceptionServices;
 
 namespace DungeonExplorer
 {
+
     public abstract class Creature
     {
         public string Name { get; private set; }
@@ -60,11 +61,15 @@ namespace DungeonExplorer
         }
         public int Strike()
         {
+            if (!Dead){
             return Damage;
+            }else {return 0;}
         }
         public void takeDamage(int damage){
             Health = Health - damage;
-            Console.Write($"\nThe {Name} took {damage} damage\n");
+            if (damage != 0){
+            Console.Write($"\n{Name} took {damage} damage\n");
+            }
             if (Health <= 0 ){Dead = true;}
         }
         public bool getDead(){return Dead;}
@@ -73,7 +78,7 @@ namespace DungeonExplorer
     public class Player : Creature
     {
         public Inventory PlayerInventory = new Inventory();
-        public int[] EquipedItem = new int[2];
+        public int[] EquipedItem = {-1,-1};
         public int PreviousRoomIndex;
         public Player(string name, int health, int damage) : base(name, health, damage){}
         public void Travel(int direction, Room location)
@@ -242,6 +247,7 @@ namespace DungeonExplorer
                 } else {
                     Console.Write("Uuuuuhhhhh, How? This message shouldn't appear. How did you do this?");
                 }
+                displayCounter++;
             }
         }
         public int[] searchIndexArray(string desiredItem)
@@ -357,7 +363,10 @@ namespace DungeonExplorer
     public class GameMap
     {
         public void OpenMap(){
-            Process.Start(@"map.png");
+            string filePath = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            filePath = filePath.Replace("\\bin\\Debug","\\map.jpg");
+            Console.WriteLine(filePath);
+            Process.Start(filePath);
         }
     }
 }

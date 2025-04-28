@@ -247,12 +247,12 @@ namespace DungeonExplorer
                     pause = true;
                     if (allRooms[player.GetRoomIndex()].GetVictoryRoom())
                     {
-                        Console.Write("Congratulations, you have reached the end of the current implimentation.");
+                        Console.Write("\nCongratulations, you have reached the end of the current implimentation.\n");
                         playing = false;
                     } else if (allRooms[player.GetRoomIndex()].getDark()){
-                        Console.Write("The room you entered is dark.");
+                        Console.Write("\nThe room you entered is dark.\n");
                         if (player.EquipedItem[0] != 2){
-                            Console.Write("You cant stay in this room, you might get attacked. You return to the previous room.");
+                            Console.Write("\nYou cant stay in this room, you might get attacked. You return to the previous room.\n");
                             player.SetRoomIndex(player.getPreviousRoomIndex());
                         }
                     }
@@ -260,11 +260,11 @@ namespace DungeonExplorer
                     if (!allRooms[player.GetRoomIndex()].getHostile().getDead()){
                         allRooms[player.GetRoomIndex()].getHostile().takeDamage(player.Strike());
                     } else {
-                        Console.Write("The enemy is already dead");
+                        Console.Write("\nThe enemy is already dead\n");
                     }
                 }else if ("6" == valueTest.KeyChar.ToString()){
                     map.OpenMap();
-                    Console.Write("You were handed this map by an old friend. Nobody knew what the symbols mean. This, you will have to uncover yourself.");
+                    Console.Write("\nYou were handed this map by an old friend. Nobody knew what the symbols mean. This, you will have to uncover yourself.\n");
                 }
                 else if ("0" == valueTest.KeyChar.ToString())
                 {
