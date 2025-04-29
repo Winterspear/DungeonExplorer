@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace DungeonExplorer
 {
@@ -69,6 +70,10 @@ namespace DungeonExplorer
             Health = Health - damage;
             if (damage != 0){
             Console.Write($"\n{Name} took {damage} damage\n");
+            if (Health <= 0)
+            {
+                Console.Write($"{Name} has been slain.\n");
+                }else{Console.Write($"{Name} has {Health} Health Points left.\n");}
             }
             if (Health <= 0 ){Dead = true;}
         }
@@ -92,24 +97,23 @@ namespace DungeonExplorer
              * None
              */
             int[] availableDirections = location.GetDirections();
-            if (availableDirections[direction] > -1 & availableDirections[direction] < 2)
+            if (direction <=4)
             {
-                PreviousRoomIndex = GetRoomIndex();
-                this.SetRoomIndex(availableDirections[direction]);
-                Console.Write("\nYou Enter a new room\n");
-            }
-            else if (availableDirections[direction]>1){
-                Console.Write("\nThe door appears to be locked\nRoom not yet implemented.\n"); 
-                // This will be replace if I update the game further
-            }
-            else
-            {
-                Console.Write("\nThere is no door there\n");
-            }
+                if (availableDirections[direction] > -1)
+                {
+                    PreviousRoomIndex = GetRoomIndex();
+                    this.SetRoomIndex(availableDirections[direction]);
+                    Console.Write("\nYou Enter a new room\n");
+                }
+                else
+                {
+                    Console.Write("\nThere is no door there\n");
+                }
+            } else {Console.Write("\nThat is not a valid direction.\n");}
         }
         public void EquipItem(string playerInput)
         {
-            int[] chosenItem = PlayerInventory.searchIndexArray(playerInput);
+            int[] chosenItem = PlayerInventory.searchIndexArrayForEquip(playerInput);
             EquipedItem[0] = chosenItem[0];
             EquipedItem[1] = chosenItem[1];
         }
@@ -121,25 +125,42 @@ namespace DungeonExplorer
             }
             return Damage;
         }
+        public void imbibe(string playerInput){
+            int[] chosenItem = PlayerInventory.searchIndexArrayForImbibe(playerInput);
+            if (chosenItem[0] == 1)
+            {
+                if(!PlayerInventory.PotionsArray[chosenItem[1]].getUsed()){
+                    Heal(PlayerInventory.PotionsArray[chosenItem[1]].getHealing());
+                    Console.WriteLine($"You Were Healed {PlayerInventory.PotionsArray[chosenItem[1]].getHealing()} health points");
+                    PlayerInventory.PotionsArray[chosenItem[1]].setUsed(true);
+                }
+            }
+        }
         public void GetStatus()
         {
-            Console.Write($"Health: {Health}\nDamage: {Strike()}\n");
+            Console.Write($"\nHealth: {Health}\nDamage: {Strike()}");
             PlayerInventory.DisplayInventoryContents();
             while (true)
             {
-                Console.Write($"What would you like to do?\n1. Equip an item\n2. Close inventory");
-                string option = Console.ReadLine();
-                if (option == "2"){break;}
-                else if (option == "1")
+                Console.Write($"\nWhat would you like to do?\n1. Equip an item\n2. Drink a Potion\n3. Close inventory\n");
+                ConsoleKeyInfo option = Console.ReadKey();
+                if (option.KeyChar.ToString() == "3"){Console.WriteLine(""); break;}
+                else if (option.KeyChar.ToString() == "1")
                 {
-                    Console.Write("Please choose an item (by name)");
+                    Console.Write("\nPlease choose an item (by name)\n");
                     string itemToEquip = Console.ReadLine();
                     EquipItem(itemToEquip);
                     if (EquipedItem[0] == -1){
                         Console.WriteLine("Items unequiped)");
                     } else {Console.Write($"You have Eqiped a {itemToEquip}");}
-                } else {
-                    Console.Write("That is not a valid input. Please try again.");
+                } else if (option.KeyChar.ToString() == "2"){
+                    Console.Write("\nPlease choose an potion (by full name)\n");
+                    string PotionToDrink = Console.ReadLine();
+                    PotionToDrink = PotionToDrink.Replace("\n", "");
+                    imbibe(PotionToDrink);
+
+                }else{
+                    Console.Write("\nThat is not a valid input. Please try again.\n");
                 }
             }
         }
@@ -169,6 +190,7 @@ namespace DungeonExplorer
             Weapon emptyWeapon = new Weapon(-1, "", "", -1);
             Potion emptyPotion = new Potion(-1, "", "", -1);
             LightSource emptyLightSource = new LightSource(-1, "", "");
+            int valueSetter = 0;
             WeaponsArray[0] = emptyWeapon;
             WeaponsArray[1] = emptyWeapon;
             WeaponsArray[2] = emptyWeapon;
@@ -177,6 +199,10 @@ namespace DungeonExplorer
             PotionsArray[2] = emptyPotion;
             LightsourceArray[0] = emptyLightSource;
             LightsourceArray[1] = emptyLightSource;
+            while (valueSetter < 8)
+            {
+                ItemIndexArray[valueSetter++,0] = -1;
+            }
         }
         public void AddWeapon(Weapon artefact)
         {
@@ -187,6 +213,7 @@ namespace DungeonExplorer
             ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,0] = artefact.getTypeID();
             ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,1] = artefact.getIndexID();
             ItemIDIndexArrayEmptySpacePointer++;
+            artefact.SetCollected(true);
         }
         public void AddPotion(Potion artefact)
         {
@@ -197,6 +224,7 @@ namespace DungeonExplorer
             ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,0] = artefact.getTypeID();
             ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,1] = artefact.getIndexID();
             ItemIDIndexArrayEmptySpacePointer++;
+            artefact.SetCollected(true);
         }
         public void AddLightSource(LightSource artefact)
         {
@@ -207,6 +235,7 @@ namespace DungeonExplorer
             ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,0] = artefact.getTypeID();
             ItemIndexArray[ItemIDIndexArrayEmptySpacePointer,1] = artefact.getIndexID();
             ItemIDIndexArrayEmptySpacePointer++;
+            artefact.SetCollected(true);
         }
         public Weapon getWeapon(int indexID){return WeaponsArray[indexID];}
         public void SortByItemID()
@@ -239,28 +268,49 @@ namespace DungeonExplorer
         public void DisplayInventoryContents()
         {
             int displayCounter = 0;
+            string displayText;
             while (displayCounter <= 7)
             {
                 if (ItemIndexArray[displayCounter, 0] == 0)
                 {
-                    Console.Write($@"{WeaponsArray[ItemIndexArray[displayCounter, 1]].getItemName()}
-                    Item Type: Weapon
-                    Description: {WeaponsArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}");
+                    if (WeaponsArray[ItemIndexArray[displayCounter, 1]].GetItemID() != -1)
+                    {
+                        displayText = $@"
+                        {WeaponsArray[ItemIndexArray[displayCounter, 1]].getItemName()}
+                        Item Type: Weapon
+                        Description: {WeaponsArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}";
+                        displayText = displayText.Replace("                        ","");
+                        Console.Write(displayText);
+                    }
                 } else if (ItemIndexArray[displayCounter, 0] == 1){
-                    Console.Write($@"{PotionsArray[ItemIndexArray[displayCounter, 1]].getItemName()}
-                    Item Type: Potion
-                    Description: {PotionsArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}");
+                    if (PotionsArray[ItemIndexArray[displayCounter, 1]].GetItemID() != -1)
+                    {
+                        displayText = $@"
+                        {PotionsArray[ItemIndexArray[displayCounter, 1]].getItemName()}
+                        Item Type: Potion
+                        Description: {PotionsArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}
+                        Used: {PotionsArray[ItemIndexArray[displayCounter,1]].getUsed()}";
+                        displayText = displayText.Replace("                        ","");
+                        Console.Write(displayText);
+                    }
                 } else if (ItemIndexArray[displayCounter, 0] == 2){
-                    Console.Write($@"{LightsourceArray[ItemIndexArray[displayCounter, 1]].getItemName()}
-                    Item Type: Light Source
-                    Description: {LightsourceArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}");
-                } else {
-                    Console.Write("Uuuuuhhhhh, How? This message shouldn't appear. How did you do this?");
+                    if (LightsourceArray[ItemIndexArray[displayCounter, 1]].GetItemID() != -1)
+                    {
+                        displayText = $@"
+                        {LightsourceArray[ItemIndexArray[displayCounter, 1]].getItemName()}
+                        Item Type: Light Source
+                        Description: {LightsourceArray[ItemIndexArray[displayCounter, 1]].GetItemDescription()}";
+                        displayText = displayText.Replace("                        ", "");
+                        Console.Write(displayText);
+                    }
+                }else if (ItemIndexArray[displayCounter, 0]== -1) {
+                }else {
+                    Console.Write("\nUuuuuhhhhh, How? This message shouldn't appear. How did you do this?");
                 }
                 displayCounter++;
             }
         }
-        public int[] searchIndexArray(string desiredItem)
+        public int[] searchIndexArrayForEquip(string desiredItem)
         {
             int searchIndex = 0;
             int arrayIndex = 0;
@@ -306,6 +356,46 @@ namespace DungeonExplorer
             outputArray[0] = -1;
             return outputArray;
         }
+        public int[] searchIndexArrayForImbibe(string desiredItem)
+        {
+            int searchIndex = 0;
+            int arrayIndex = 0;
+            int[] outputArray = new int[2];
+            while (true)
+            {
+                while (searchIndex < 3){
+                    if (arrayIndex == 0)
+                    {
+                        if (WeaponsArray[searchIndex].getItemName().ToLower() == desiredItem.ToLower()){
+                            Console.Write("\nYou cannot drink a weapon.");
+                        }
+                    } else if (arrayIndex == 1){
+                        if (PotionsArray[searchIndex].getItemName().ToLower() == desiredItem.ToLower())
+                        {
+                            outputArray[0] = arrayIndex;
+                            outputArray[1] = searchIndex;
+                            return outputArray;
+                        }
+                    } else if (arrayIndex == 2){
+                        if (searchIndex == 2)
+                        {
+                            Console.Write("You do not possess that item.");
+                            return outputArray;
+                        }else if (LightsourceArray[searchIndex].getItemName().ToLower() == desiredItem.ToLower()){
+                            Console.Write("\nDrinking wax is a bad idea.\n");
+                        }
+                    } else
+                    {Console.Write("You do not own that item");}
+                    searchIndex++;
+                }
+                searchIndex = 0;
+                arrayIndex++;
+                if (arrayIndex == 4){break;}
+            }
+            outputArray[1] = -1;
+            outputArray[0] = -1;
+            return outputArray;
+        }
         public int[,] getItemIndexArray(){return ItemIndexArray;}
     }
     public abstract class Items
@@ -333,6 +423,7 @@ namespace DungeonExplorer
         public int GetItemID(){return ItemID;}
         public void SetIndexID(int indexID){ItemIndex[1] = indexID;}
         public void SetCollected(bool collected){ Collected = collected;}
+        public bool getCollected(){return Collected;}
         public int[] GetItemIndex(){return ItemIndex;}
         public string GetItemDescription(){return ItemDescription;}
     }
@@ -356,10 +447,9 @@ namespace DungeonExplorer
         {
             Healing = healing;
         }
-        public void imbibe(Player user)
-        {
-            user.Heal(Healing);
-        }
+        public int getHealing(){return Healing;}
+        public void setUsed(bool used){Used = used;}
+        public bool getUsed(){return Used;}
     }
     public class LightSource : Items
     {
@@ -375,7 +465,6 @@ namespace DungeonExplorer
         public void OpenMap(){
             string filePath = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             filePath = filePath.Replace("\\bin\\Debug","\\map.jpg");
-            Console.WriteLine(filePath);
             Process.Start(filePath);
         }
     }

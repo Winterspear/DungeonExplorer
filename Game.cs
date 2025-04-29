@@ -21,7 +21,7 @@ namespace DungeonExplorer
              * Outputs:
              * None
              */
-            this.player = new Player("You", 100, 5);
+            this.player = new Player("Player", 100, 5);
         }
         public void GenerateRooms()
         {
@@ -79,7 +79,7 @@ namespace DungeonExplorer
             action = action.Replace("                ", " ");
             foyer.SetAction(action);
             foyer.SetIndex(1);
-            foyer.SetAdjacent(2, 3, 0, -1);
+            foyer.SetAdjacent(2, -1, 0, 3);
             roomEnemy = new Enemy("Skeleton", 20, 2);
             foyer.setHostile(roomEnemy);
             this.allRooms.Add(foyer);
@@ -93,7 +93,7 @@ namespace DungeonExplorer
             action = action.Replace("               ", " ");
             diningRoom.SetAction(action);
             diningRoom.SetIndex(2);
-            diningRoom.SetAdjacent(4, 5, -1, 1);
+            diningRoom.SetAdjacent(4, 5, 1, -1);
             roomEnemy = new Enemy("Slime", 40, 1);
             diningRoom.setHostile(roomEnemy);
             allRooms.Add(diningRoom);
@@ -108,7 +108,7 @@ namespace DungeonExplorer
             action = action.Replace("               ", " ");
             mastersBedroom.SetAction(action);
             mastersBedroom.SetIndex(3);
-            mastersBedroom.SetAdjacent(5,1,6,-1);
+            mastersBedroom.SetAdjacent(5,1,-1,6);
             roomEnemy = new Enemy("Skeleton", 20,2);
             mastersBedroom.setHostile(roomEnemy);
             allRooms.Add(mastersBedroom);
@@ -137,8 +137,8 @@ namespace DungeonExplorer
             action = action.Replace("               ", " ");
             ballRoom.SetAction(action);
             ballRoom.SetIndex(5);
-            ballRoom.SetAdjacent(-1,8,2,3);
-            roomEnemy = new Enemy("Slime", 40, 1);
+            ballRoom.SetAdjacent(-1,2,3,8);
+            roomEnemy = new Enemy("Demon Hound", 40, 10);
             ballRoom.setHostile(roomEnemy);
             allRooms.Add(ballRoom);
             design = @"A tub resides near the south wall, a mirror by the north. Nex to the mirror, on a side table, is a shaving set.";
@@ -164,7 +164,7 @@ namespace DungeonExplorer
             pantry.SetAction(action);
             pantry.SetIndex(7);
             pantry.SetAdjacent(-1, -1, -1 , 4);
-            roomEnemy = new Enemy("Demon Hound", 40, 3);
+            roomEnemy = new Enemy("Slime", 40, 1);
             pantry.setHostile(roomEnemy);
             allRooms.Add(pantry);
             design = @"There are several bunks around the room,
@@ -179,6 +179,8 @@ namespace DungeonExplorer
             servantsQuarters.SetDark(true);
             servantsQuarters.SetIndex(8);
             servantsQuarters.SetAdjacent(9,-1,-1,5);
+            roomEnemy = new Enemy("",0,0);
+            servantsQuarters.setHostile(roomEnemy);
             allRooms.Add(servantsQuarters);
             design = @"Not needed";
             design = design.Replace("               ", " ");
@@ -186,7 +188,10 @@ namespace DungeonExplorer
             action = @"Not needed";
             finalRoom.SetAction(action);
             finalRoom.SetIndex(9);
-            finalRoom.SetAdjacent(8, -1, -1, -1);
+            finalRoom.SetAdjacent(-1, -1, 8, -1);
+            roomEnemy = new Enemy("",0,0);
+            finalRoom.setHostile(roomEnemy);
+            finalRoom.SetVicoryRoom(true);
             allRooms.Add(finalRoom);
         }
         public void Start()
@@ -202,6 +207,7 @@ namespace DungeonExplorer
             this.GenerateRooms();
             bool playing = true;
             bool pause = false;
+            bool roomItemVoid = false;
             while (playing)
             {
                 Console.WriteLine("1. Look around the room.");
@@ -224,16 +230,31 @@ namespace DungeonExplorer
                 }
                 else if ("3" == valueTest.KeyChar.ToString())
                 {
-                    Console.Write($"\n{allRooms[player.GetRoomIndex()].GetAction()}\n");
                     string artefactType = allRooms[player.GetRoomIndex()].getRoomItemType();
                     if (artefactType == "Weapon"){
-                        player.PlayerInventory.AddWeapon(allRooms[player.GetRoomIndex()].getRoomWeapon()); 
+                        if (!allRooms[player.GetRoomIndex()].getRoomWeapon().getCollected())
+                        {
+                        player.PlayerInventory.AddWeapon(allRooms[player.GetRoomIndex()].getRoomWeapon());
+                        } 
                     } else if (artefactType == "Potion"){
+                        if (!allRooms[player.GetRoomIndex()].getRoomPotion().getCollected())
+                        {
                         player.PlayerInventory.AddPotion(allRooms[player.GetRoomIndex()].getRoomPotion());
+                        }
                     } else if (artefactType == "LightSource") {
+                        if (!allRooms[player.GetRoomIndex()].getRoomLightSource().getCollected())
+                        {
                         player.PlayerInventory.AddLightSource(allRooms[player.GetRoomIndex()].getRoomLightSource());
+                        }
                     } else if (artefactType == "Void") {
-                    } else { Console.Write("Uuuuuhhhhh, How? This message shouldn't appear. How did you do this?");}
+                        Console.Write("\nThere is nothing worth taking in this room.");
+                        roomItemVoid = true;
+                    } else { Console.Write("\nUuuuuhhhhh, How? This message shouldn't appear. How did you do this?");}
+                    if (!roomItemVoid)
+                    {
+                        Console.Write($"\n{allRooms[player.GetRoomIndex()].GetAction()}\n");
+                        allRooms[player.GetRoomIndex()].SetAction("You have already collected the item from this room.");
+                    }
                 }
                 else if ("4" == valueTest.KeyChar.ToString())
                 {
@@ -276,7 +297,7 @@ namespace DungeonExplorer
                 {
                     Console.WriteLine("\nThat is not a valid input.\nPlease try again...\n");
                 }
-                if (!allRooms[player.GetRoomIndex()].getHostile().getDead() || !pause)
+                if (!allRooms[player.GetRoomIndex()].getHostile().getDead() && !pause)
                 {
                     player.takeDamage(allRooms[player.GetRoomIndex()].getHostile().Strike());
                     if (player.getDead())
