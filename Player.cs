@@ -166,7 +166,17 @@ namespace DungeonExplorer
         public int ItemIDIndexArrayEmptySpacePointer = 0;
         public Inventory()
         {
-
+            Weapon emptyWeapon = new Weapon(-1, "", "", -1);
+            Potion emptyPotion = new Potion(-1, "", "", -1);
+            LightSource emptyLightSource = new LightSource(-1, "", "");
+            WeaponsArray[0] = emptyWeapon;
+            WeaponsArray[1] = emptyWeapon;
+            WeaponsArray[2] = emptyWeapon;
+            PotionsArray[0] = emptyPotion;
+            PotionsArray[1] = emptyPotion;
+            PotionsArray[2] = emptyPotion;
+            LightsourceArray[0] = emptyLightSource;
+            LightsourceArray[1] = emptyLightSource;
         }
         public void AddWeapon(Weapon artefact)
         {
