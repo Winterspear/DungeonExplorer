@@ -151,7 +151,7 @@ namespace DungeonExplorer
                     string itemToEquip = Console.ReadLine();
                     EquipItem(itemToEquip);
                     if (EquipedItem[0] == -1){
-                        Console.WriteLine("Items unequiped)");
+                        Console.WriteLine("\n(Items unequiped)");
                     } else {Console.Write($"You have Eqiped a {itemToEquip}");}
                 } else if (option.KeyChar.ToString() == "2"){
                     Console.Write("\nPlease choose an potion (by full name)\n");

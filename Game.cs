@@ -79,7 +79,7 @@ namespace DungeonExplorer
             action = action.Replace("                ", " ");
             foyer.SetAction(action);
             foyer.SetIndex(1);
-            foyer.SetAdjacent(2, -1, 0, 3);
+            foyer.SetAdjacent(2, 3, 0, -1);
             roomEnemy = new Enemy("Skeleton", 20, 2);
             foyer.setHostile(roomEnemy);
             this.allRooms.Add(foyer);
@@ -137,7 +137,7 @@ namespace DungeonExplorer
             action = action.Replace("               ", " ");
             ballRoom.SetAction(action);
             ballRoom.SetIndex(5);
-            ballRoom.SetAdjacent(-1,2,3,8);
+            ballRoom.SetAdjacent(-1,8,3,2);
             roomEnemy = new Enemy("Demon Hound", 40, 10);
             ballRoom.setHostile(roomEnemy);
             allRooms.Add(ballRoom);
@@ -150,7 +150,7 @@ namespace DungeonExplorer
             action = action.Replace("               ", " ");
             mastersBathroom.SetAction(action);
             mastersBathroom.SetIndex(6);
-            mastersBathroom.SetAdjacent(-1, 3, -1, -1);
+            mastersBathroom.SetAdjacent(-1, -1, -1, 3);
             roomEnemy = new Enemy("Zombie", 20, 4);
             mastersBathroom.setHostile(roomEnemy);
             allRooms.Add(mastersBathroom);
